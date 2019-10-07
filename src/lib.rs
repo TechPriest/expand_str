@@ -53,7 +53,13 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
         }
 
         if !self.reading_var {
-            None
+            let token_slice = &self.src[self.token_start .. ];
+            if !token_slice.is_empty() {
+                self.token_start = self.src.len();
+                Some(Ok(ExpandableStrEntry::Substr(token_slice)))
+            } else {
+                None
+            }
         } else {
             Some(Err(ExpandableStrSplitError::InvalidFormat))
         }
@@ -62,8 +68,14 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn splits_string() {
+        let src = "foo%bar%baz";
+        let split = ExpandableStringSplit::new(src);
+        for x in split {
+            let _ = dbg!(x);
+        }
     }
 }
