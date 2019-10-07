@@ -99,3 +99,24 @@ mod tests {
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
     }
 }
+
+pub trait NamedValuesSource {
+    fn get(&self, key: &str) -> Option<&str>;
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ExpandStringError {
+    InvalidFormat,
+    MissingVariable
+}
+
+impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
+    fn from(x: ExpandableStrSplitError) -> Self {
+        match x {
+            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat
+        }
+    }
+}
+
+
+
