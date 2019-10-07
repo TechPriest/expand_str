@@ -25,8 +25,15 @@ pub enum ExpandableStrEntry<'a> {
     Var(&'a str),
 }
 
+#[derive(Debug)]
+pub enum ExpandableStrSplitError {
+    InvalidFormat
+}
+
+pub type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
+
 impl<'a> Iterator for ExpandableStringSplit<'a> {
-    type Item = ExpandableStrEntry<'a>;
+    type Item = ExpandableStrSplitResult<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some((n, c)) = self.chars_iter.next() {
@@ -37,15 +44,19 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                     let token_slice = &self.src[self.token_start .. n];
                     self.token_start = n + 1;
                     if reading_var {
-                        return Some(ExpandableStrEntry::Var(token_slice));
+                        return Some(Ok(ExpandableStrEntry::Var(token_slice)));
                     } else {
-                        return Some(ExpandableStrEntry::Substr(token_slice));
+                        return Some(Ok(ExpandableStrEntry::Substr(token_slice)));
                     }
                 }
             }
         }
 
-        None
+        if !self.reading_var {
+            None
+        } else {
+            Some(Err(ExpandableStrSplitError::InvalidFormat))
+        }
     }
 }
 
