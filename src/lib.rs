@@ -48,6 +48,8 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                     } else {
                         return Some(Ok(ExpandableStrEntry::Substr(token_slice)));
                     }
+                } else {
+                    self.token_start = 1;
                 }
             }
         }
@@ -72,7 +74,7 @@ mod tests {
 
     #[test]
     fn splits_string() {
-        let src = "foo%bar%baz";
+        let src = "%foo%bar";
         let split = ExpandableStringSplit::new(src);
         for x in split {
             let _ = dbg!(x);
