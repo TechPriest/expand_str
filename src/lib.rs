@@ -43,10 +43,12 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                 if n > 0 {
                     let token_slice = &self.src[self.token_start..n];
                     self.token_start = n + 1;
-                    if reading_var {
-                        return Some(Ok(ExpandableStrEntry::Var(token_slice)));
-                    } else {
-                        return Some(Ok(ExpandableStrEntry::Substr(token_slice)));
+                    if !token_slice.is_empty() {
+                        if reading_var {
+                            return Some(Ok(ExpandableStrEntry::Var(token_slice)));
+                        } else {
+                            return Some(Ok(ExpandableStrEntry::Substr(token_slice)));
+                        }
                     }
                 } else {
                     self.token_start = 1;
@@ -80,4 +82,22 @@ mod tests {
             .collect();
         assert_eq!(x, vec![Substr("foo"), Var("bar")]);
     }
+
+    #[test]
+    fn splits_string_starting_with_var() {
+        let src = "%foo%bar";
+        let x: Vec<_> = ExpandableStringSplit::new(src)
+            .filter_map(Result::ok)
+            .collect();
+        assert_eq!(x, vec![Var("foo"), Substr("bar")]);
+    }
+
+    #[test]
+    fn splits_string_with_two_adjacent_vars() {
+        let src = "%foo%%bar%";
+        let x: Vec<_> = ExpandableStringSplit::new(src)
+            .filter_map(Result::ok)
+            .collect();
+        assert_eq!(x, vec![Var("foo"), Var("bar")]);
+    }    
 }
