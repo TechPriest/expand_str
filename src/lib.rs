@@ -107,16 +107,20 @@ pub trait NamedValuesSource {
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandStringError {
     InvalidFormat,
-    MissingVariable
+    MissingVariable,
 }
 
 impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
     fn from(x: ExpandableStrSplitError) -> Self {
         match x {
-            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat
+            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
         }
     }
 }
 
-
-
+pub fn expand_string_with_values<T>(s: &str, values: &T) -> String
+where
+    T: NamedValuesSource,
+{
+    unimplemented!()
+}
