@@ -19,15 +19,15 @@ impl<'a> ExpandableStringSplit<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ExpandableStrEntry<'a> {
     Substr(&'a str),
     Var(&'a str),
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum ExpandableStrSplitError {
-    InvalidFormat
+    InvalidFormat,
 }
 
 pub type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
@@ -41,7 +41,7 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                 let reading_var = self.reading_var;
                 self.reading_var = !reading_var;
                 if n > 0 {
-                    let token_slice = &self.src[self.token_start .. n];
+                    let token_slice = &self.src[self.token_start..n];
                     self.token_start = n + 1;
                     if reading_var {
                         return Some(Ok(ExpandableStrEntry::Var(token_slice)));
@@ -55,7 +55,7 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
         }
 
         if !self.reading_var {
-            let token_slice = &self.src[self.token_start .. ];
+            let token_slice = &self.src[self.token_start..];
             if !token_slice.is_empty() {
                 self.token_start = self.src.len();
                 Some(Ok(ExpandableStrEntry::Substr(token_slice)))
@@ -70,14 +70,14 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use super::{ExpandableStrEntry::*, *};
 
     #[test]
     fn splits_string() {
-        let src = "%foo%bar";
-        let split = ExpandableStringSplit::new(src);
-        for x in split {
-            let _ = dbg!(x);
-        }
+        let src = "foo%bar%";
+        let x: Vec<_> = ExpandableStringSplit::new(src)
+            .filter_map(Result::ok)
+            .collect();
+        assert_eq!(x, vec![Substr("foo"), Var("bar")]);
     }
 }
