@@ -8,14 +8,12 @@ pub struct ExpandableStringSplit<'a> {
     reading_var: bool,
 }
 
-impl<'a> ExpandableStringSplit<'a> {
-    pub fn new(src: &'a str) -> Self {
-        Self {
-            chars_iter: src.char_indices(),
-            src,
-            token_start: 0,
-            reading_var: false,
-        }
+pub fn split_expandable_string(s: &str) -> ExpandableStringSplit {
+    ExpandableStringSplit {
+        chars_iter: s.char_indices(),
+        src: s,
+        token_start: 0,
+        reading_var: false,
     }
 }
 
@@ -77,7 +75,7 @@ mod tests {
     #[test]
     fn splits_string() {
         let src = "foo%bar%";
-        let x: Vec<_> = ExpandableStringSplit::new(src)
+        let x: Vec<_> = split_expandable_string(src)
             .filter_map(Result::ok)
             .collect();
         assert_eq!(x, vec![Substr("foo"), Var("bar")]);
@@ -86,7 +84,7 @@ mod tests {
     #[test]
     fn splits_string_starting_with_var() {
         let src = "%foo%bar";
-        let x: Vec<_> = ExpandableStringSplit::new(src)
+        let x: Vec<_> = split_expandable_string(src)
             .filter_map(Result::ok)
             .collect();
         assert_eq!(x, vec![Var("foo"), Substr("bar")]);
@@ -95,9 +93,9 @@ mod tests {
     #[test]
     fn splits_string_with_two_adjacent_vars() {
         let src = "%foo%%bar%";
-        let x: Vec<_> = ExpandableStringSplit::new(src)
+        let x: Vec<_> = split_expandable_string(src)
             .filter_map(Result::ok)
             .collect();
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
-    }    
+    }
 }
