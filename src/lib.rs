@@ -81,22 +81,22 @@ pub enum ExpandStringError {
 impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
     fn from(src: ExpandableStrSplitError) -> Self {
         match src {
-            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat
+            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
         }
     }
 }
 
 pub fn expand_string_with_values<F>(s: &str, get_value: F) -> Result<String, ExpandStringError>
 where
-    F: Fn(&str) -> Option<String>
+    F: Fn(&str) -> Option<String>,
 {
     let mut expanded_str = String::with_capacity(s.len());
-    
+
     for entry in split_expandable_string(s) {
         match entry? {
             ExpandableStrEntry::Substr(s) => {
                 expanded_str += s;
-            },
+            }
             ExpandableStrEntry::Var(id) => {
                 expanded_str += &get_value(id).ok_or(ExpandStringError::MissingVariable)?;
             }
@@ -105,7 +105,6 @@ where
 
     Ok(expanded_str)
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -139,5 +138,18 @@ mod tests {
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
     }
 
-}
+    #[test]
+    fn expands_string_with_values() {
+        let values = {
+            let mut values = HashMap::new();
+            values.insert("DRINK", "a cup of tea");
+            values.insert("FOOD", "cookies");
+            values
+        };
 
+        let src = "This is a string with a %DRINK% and some %FOOD%.";
+        let x =
+            expand_string_with_values(src, |id| values.get(id).copied().map(String::from)).unwrap();
+        assert_eq!(x, "This is a string with a a cup of tea and some cookies.");
+    }
+}
