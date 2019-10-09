@@ -68,9 +68,49 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
     }
 }
 
+pub trait NamedValuesSource {
+    fn get(&self, key: &str) -> Option<&str>;
+}
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum ExpandStringError {
+    InvalidFormat,
+    MissingVariable,
+}
+
+impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
+    fn from(src: ExpandableStrSplitError) -> Self {
+        match src {
+            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat
+        }
+    }
+}
+
+pub fn expand_string_with_values<F>(s: &str, get_value: F) -> Result<String, ExpandStringError>
+where
+    F: Fn(&str) -> Option<String>
+{
+    let mut expanded_str = String::with_capacity(s.len());
+    
+    for entry in split_expandable_string(s) {
+        match entry? {
+            ExpandableStrEntry::Substr(s) => {
+                expanded_str += s;
+            },
+            ExpandableStrEntry::Var(id) => {
+                expanded_str += &get_value(id).ok_or(ExpandStringError::MissingVariable)?;
+            }
+        }
+    }
+
+    Ok(expanded_str)
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::{ExpandableStrEntry::*, *};
+    use std::collections::HashMap;
 
     #[test]
     fn splits_string() {
@@ -98,29 +138,6 @@ mod tests {
             .collect();
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
     }
+
 }
 
-pub trait NamedValuesSource {
-    fn get(&self, key: &str) -> Option<&str>;
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub enum ExpandStringError {
-    InvalidFormat,
-    MissingVariable,
-}
-
-impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
-    fn from(x: ExpandableStrSplitError) -> Self {
-        match x {
-            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
-        }
-    }
-}
-
-pub fn expand_string_with_values<T>(s: &str, values: &T) -> String
-where
-    T: NamedValuesSource,
-{
-    unimplemented!()
-}
