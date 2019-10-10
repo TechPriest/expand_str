@@ -152,7 +152,7 @@ mod tests {
     fn fails_to_parse_malformed_string() {
         let src = "%";
         let x: Vec<_> = split_expandable_string(src).collect();
-        dbg!(x);
+        assert_eq!(x, vec![Err(ExpandableStrSplitError::InvalidFormat)]);
     }
 
     #[test]
