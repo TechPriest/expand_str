@@ -86,9 +86,10 @@ impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
     }
 }
 
-pub fn expand_string_with_values<F>(s: &str, get_value: F) -> Result<String, ExpandStringError>
+pub fn expand_string_with_values<F, S>(s: &str, get_value: F) -> Result<String, ExpandStringError>
 where
-    F: Fn(&str) -> Option<String>,
+    F: Fn(&str) -> Option<S>,
+    S: AsRef<str>,
 {
     let mut expanded_str = String::with_capacity(s.len());
 
@@ -98,7 +99,8 @@ where
                 expanded_str += s;
             }
             ExpandableStrEntry::Var(id) => {
-                expanded_str += &get_value(id).ok_or(ExpandStringError::MissingVariable)?;
+                let val = get_value(id).ok_or(ExpandStringError::MissingVariable)?;
+                expanded_str += val.as_ref();
             }
         }
     }
@@ -138,6 +140,13 @@ mod tests {
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
     }
 
+    trait GetFoo<T>
+    where
+        T: AsRef<str>,
+    {
+        fn get_foo(&self) -> T;
+    }
+
     #[test]
     fn expands_string_with_values() {
         let values = {
@@ -148,8 +157,7 @@ mod tests {
         };
 
         let src = "This is a string with a %DRINK% and some %FOOD%.";
-        let x =
-            expand_string_with_values(src, |id| values.get(id).copied().map(String::from)).unwrap();
+        let x = expand_string_with_values(src, |id| values.get(id)).unwrap();
         assert_eq!(x, "This is a string with a a cup of tea and some cookies.");
     }
 }
