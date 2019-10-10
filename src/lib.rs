@@ -6,6 +6,7 @@ pub struct ExpandableStringSplit<'a> {
     chars_iter: std::str::CharIndices<'a>,
     token_start: usize,
     reading_var: bool,
+    done: bool,
 }
 
 pub fn split_expandable_string(s: &str) -> ExpandableStringSplit {
@@ -14,6 +15,7 @@ pub fn split_expandable_string(s: &str) -> ExpandableStringSplit {
         src: s,
         token_start: 0,
         reading_var: false,
+        done: false,
     }
 }
 
@@ -34,6 +36,10 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
     type Item = ExpandableStrSplitResult<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            return None;
+        }
+
         while let Some((n, c)) = self.chars_iter.next() {
             if c == '%' {
                 let reading_var = self.reading_var;
@@ -53,6 +59,8 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                 }
             }
         }
+
+        self.done = true;
 
         if !self.reading_var {
             let token_slice = &self.src[self.token_start..];
@@ -140,11 +148,11 @@ mod tests {
         assert_eq!(x, vec![Var("foo"), Var("bar")]);
     }
 
-    trait GetFoo<T>
-    where
-        T: AsRef<str>,
-    {
-        fn get_foo(&self) -> T;
+    #[test]
+    fn fails_to_parse_malformed_string() {
+        let src = "%";
+        let x: Vec<_> = split_expandable_string(src).collect();
+        dbg!(x);
     }
 
     #[test]
