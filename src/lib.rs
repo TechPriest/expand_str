@@ -116,6 +116,21 @@ where
     Ok(expanded_str)
 }
 
+#[cfg(feature = "env")]
+pub fn expand_string_with_env(s: &str) -> Result<String, ExpandStringError> {
+    fn get_var_value(key: &str) -> Option<String> {
+        use std::ffi::{OsString, OsStr};
+
+        std::env::var_os(key)
+            .as_ref()
+            .map(OsString::as_os_str)
+            .map(OsStr::to_string_lossy)
+            .map(Into::into)
+    }
+
+    expand_string_with_values(s, get_var_value)
+}
+
 #[cfg(test)]
 mod tests {
     use super::{ExpandableStrEntry::*, *};
