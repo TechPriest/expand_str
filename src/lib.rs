@@ -81,10 +81,6 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
     }
 }
 
-pub trait NamedValuesSource {
-    fn get(&self, key: &str) -> Option<&str>;
-}
-
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandStringError<'a> {
     Splitting(ExpandableStrSplitError),
