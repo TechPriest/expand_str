@@ -31,15 +31,15 @@ enum ExpandableStrEntry<'a> {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum ExpandableStrSplitError {
+pub enum ExpandableStrSplitError<'a> {
     /// Invalid input string (basically, non-closed variable name)
     InvalidFormat,
 
     /// Bad variable name; names should not contain space or equality sign
-    InvalidVariableName,
+    InvalidVariableName(&'a str),
 }
 
-type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
+type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError<'a>>;
 
 impl<'a> Iterator for ExpandableStringSplit<'a> {
     type Item = ExpandableStrSplitResult<'a>;
@@ -70,7 +70,8 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                 match c {
                     '=' | ' ' => {
                         self.done = true;
-                        return Some(Err(ExpandableStrSplitError::InvalidVariableName))
+                        let token_slice = &self.src[self.token_start..n];
+                        return Some(Err(ExpandableStrSplitError::InvalidVariableName(token_slice)))
                     }
                     _ => (),
                 }
@@ -95,13 +96,13 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandStringError<'a> {
-    Splitting(ExpandableStrSplitError),
+    Splitting(ExpandableStrSplitError<'a>),
     MissingVariable(&'a str),
     Formatting(FmtError),
 }
 
-impl<'a> From<ExpandableStrSplitError> for ExpandStringError<'a> {
-    fn from(e: ExpandableStrSplitError) -> Self {
+impl<'a> From<ExpandableStrSplitError<'a>> for ExpandStringError<'a> {
+    fn from(e: ExpandableStrSplitError<'a>) -> Self {
         Self::Splitting(e)
     }
 }
