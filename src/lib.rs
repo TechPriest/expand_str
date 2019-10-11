@@ -6,7 +6,7 @@ use std::iter::Iterator;
 mod tests;
 
 #[derive(Debug)]
-pub struct ExpandableStringSplit<'a> {
+struct ExpandableStringSplit<'a> {
     src: &'a str,
     chars_iter: std::str::CharIndices<'a>,
     token_start: usize,
@@ -14,7 +14,7 @@ pub struct ExpandableStringSplit<'a> {
     done: bool,
 }
 
-pub fn split_expandable_string(s: &str) -> ExpandableStringSplit {
+fn split_expandable_string(s: &str) -> ExpandableStringSplit {
     ExpandableStringSplit {
         chars_iter: s.char_indices(),
         src: s,
@@ -25,7 +25,7 @@ pub fn split_expandable_string(s: &str) -> ExpandableStringSplit {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum ExpandableStrEntry<'a> {
+enum ExpandableStrEntry<'a> {
     Substr(&'a str),
     Var(&'a str),
 }
@@ -35,7 +35,7 @@ pub enum ExpandableStrSplitError {
     InvalidFormat,
 }
 
-pub type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
+type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
 
 impl<'a> Iterator for ExpandableStringSplit<'a> {
     type Item = ExpandableStrSplitResult<'a>;
