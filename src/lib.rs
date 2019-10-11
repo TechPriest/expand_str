@@ -34,6 +34,9 @@ enum ExpandableStrEntry<'a> {
 pub enum ExpandableStrSplitError {
     /// Invalid input string (basically, non-closed variable name)
     InvalidFormat,
+
+    /// Bad variable name; names should not contain space or equality sign
+    InvalidVariableName,
 }
 
 type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
@@ -62,6 +65,14 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                     }
                 } else {
                     self.token_start = 1;
+                }
+            } else if self.reading_var {
+                match c {
+                    '=' | ' ' => {
+                        self.done = true;
+                        return Some(Err(ExpandableStrSplitError::InvalidVariableName))
+                    }
+                    _ => (),
                 }
             }
         }
