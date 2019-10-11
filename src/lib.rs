@@ -32,6 +32,7 @@ enum ExpandableStrEntry<'a> {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandableStrSplitError {
+    /// Invalid input string (basically, non-closed variable name)
     InvalidFormat,
 }
 
