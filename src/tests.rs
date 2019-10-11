@@ -48,3 +48,10 @@ fn expands_string_with_values() {
     let x = expand_string_with_values(src, |id| values.get(id)).unwrap();
     assert_eq!(x, "This is a string with a a cup of tea and some cookies.");
 }
+
+#[test]
+fn reports_missing_variable() {
+    let src = "Some %FOO%";
+    let x = expand_string_with_values(src, |_| -> Option<&str> { None });
+    assert_eq!(x, Err(ExpandStringError::MissingVariable("FOO")));
+}
