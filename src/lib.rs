@@ -96,6 +96,7 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandStringError<'a> {
     Splitting(ExpandableStrSplitError),
+    /// Variable specified in source string is missing in provided context (or process environment)
     MissingVariable(&'a str),
     Formatting(FmtError),
 }
