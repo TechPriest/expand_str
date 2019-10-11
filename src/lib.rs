@@ -1,3 +1,5 @@
+use std::convert::From;
+use std::fmt::{Display, Error as FmtError, Write};
 use std::iter::Iterator;
 
 #[derive(Debug)]
@@ -84,20 +86,27 @@ pub trait NamedValuesSource {
 pub enum ExpandStringError<'a> {
     InvalidFormat,
     MissingVariable(&'a str),
+    FormattingError(FmtError),
 }
 
-impl<'a> std::convert::From<ExpandableStrSplitError> for ExpandStringError<'a> {
-    fn from(src: ExpandableStrSplitError) -> Self {
-        match src {
+impl<'a> From<ExpandableStrSplitError> for ExpandStringError<'a> {
+    fn from(e: ExpandableStrSplitError) -> Self {
+        match e {
             ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
         }
+    }
+}
+
+impl<'a> From<FmtError> for ExpandStringError<'a> {
+    fn from(e: FmtError) -> Self {
+        Self::FormattingError(e)
     }
 }
 
 pub fn expand_string_with_values<F, S>(s: &str, get_value: F) -> Result<String, ExpandStringError>
 where
     F: Fn(&str) -> Option<S>,
-    S: AsRef<str>,
+    S: Display,
 {
     let mut expanded_str = String::with_capacity(s.len());
 
@@ -108,7 +117,7 @@ where
             }
             ExpandableStrEntry::Var(id) => {
                 let val = get_value(id).ok_or(ExpandStringError::MissingVariable(id))?;
-                expanded_str += val.as_ref();
+                write!(&mut expanded_str, "{}", val)?;
             }
         }
     }
@@ -119,7 +128,7 @@ where
 #[cfg(feature = "env")]
 pub fn expand_string_with_env(s: &str) -> Result<String, ExpandStringError> {
     fn get_var_value(key: &str) -> Option<String> {
-        use std::ffi::{OsString, OsStr};
+        use std::ffi::{OsStr, OsString};
 
         std::env::var_os(key)
             .as_ref()
