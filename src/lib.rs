@@ -81,12 +81,12 @@ pub trait NamedValuesSource {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum ExpandStringError {
+pub enum ExpandStringError<'a> {
     InvalidFormat,
-    MissingVariable,
+    MissingVariable(&'a str),
 }
 
-impl std::convert::From<ExpandableStrSplitError> for ExpandStringError {
+impl<'a> std::convert::From<ExpandableStrSplitError> for ExpandStringError<'a> {
     fn from(src: ExpandableStrSplitError) -> Self {
         match src {
             ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
@@ -107,7 +107,7 @@ where
                 expanded_str += s;
             }
             ExpandableStrEntry::Var(id) => {
-                let val = get_value(id).ok_or(ExpandStringError::MissingVariable)?;
+                let val = get_value(id).ok_or(ExpandStringError::MissingVariable(id))?;
                 expanded_str += val.as_ref();
             }
         }
