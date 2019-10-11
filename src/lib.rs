@@ -84,22 +84,20 @@ pub trait NamedValuesSource {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum ExpandStringError<'a> {
-    InvalidFormat,
+    Splitting(ExpandableStrSplitError),
     MissingVariable(&'a str),
-    FormattingError(FmtError),
+    Formatting(FmtError),
 }
 
 impl<'a> From<ExpandableStrSplitError> for ExpandStringError<'a> {
     fn from(e: ExpandableStrSplitError) -> Self {
-        match e {
-            ExpandableStrSplitError::InvalidFormat => Self::InvalidFormat,
-        }
+        Self::Splitting(e)
     }
 }
 
 impl<'a> From<FmtError> for ExpandStringError<'a> {
     fn from(e: FmtError) -> Self {
-        Self::FormattingError(e)
+        Self::Formatting(e)
     }
 }
 
