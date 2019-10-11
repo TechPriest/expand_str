@@ -36,6 +36,17 @@ fn fails_to_parse_malformed_string() {
 }
 
 #[test]
+fn fails_to_parse_invalid_var_name() {
+    let src = "Some %FOO BAR% here";
+    let x: Vec<_> = split_expandable_string(src).collect();
+    assert_eq!(x[1], Err(ExpandableStrSplitError::InvalidVariableName));
+
+    let src = "Some %FOO=BAR% here";
+    let x: Vec<_> = split_expandable_string(src).collect();
+    assert_eq!(x[1], Err(ExpandableStrSplitError::InvalidVariableName));    
+}
+
+#[test]
 fn expands_string_with_values() {
     let values = {
         let mut values = HashMap::new();
