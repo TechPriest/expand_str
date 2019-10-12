@@ -3,8 +3,9 @@ name = "expand_str"
 version = "0.1.0"
 authors = ["TechPriest <yaminogakusei@gmail.com>"]
 edition = "2018"
+license = "WTFPL"
+keywords = ["string", "formatting", "ExpandEnvironmentStrings"]
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
 default = ["env"]
