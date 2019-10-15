@@ -55,9 +55,9 @@ fn expands_string_with_values() {
         values
     };
 
-    let src = "This is a string with a %DRINK% and some %FOOD%.";
+    let src = "This is a string with %DRINK% and some %FOOD%.";
     let x = expand_string_with_values(src, |id| values.get(id)).unwrap();
-    assert_eq!(x, "This is a string with a a cup of tea and some cookies.");
+    assert_eq!(x, "This is a string with a cup of tea and some cookies.");
 }
 
 #[test]
