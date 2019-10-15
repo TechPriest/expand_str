@@ -5,7 +5,7 @@ authors = ["TechPriest <yaminogakusei@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/TechPriest/expand_str.git"
 license = "WTFPL"
-keywords = ["string", "formatting", "ExpandEnvironmentStrings"]
+keywords = ["string", "formatting", "batch", "windows", "environment"]
 description = "ExpandEnvironmentStrings-like function and string formatting utility"
 readme = "README.md"
 
