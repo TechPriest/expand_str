@@ -70,7 +70,7 @@ impl<'a> Iterator for ExpandableStringSplit<'a> {
                 match c {
                     '=' | ' ' => {
                         self.done = true;
-                        return Some(Err(ExpandableStrSplitError::InvalidVariableName))
+                        return Some(Err(ExpandableStrSplitError::InvalidVariableName));
                     }
                     _ => (),
                 }
