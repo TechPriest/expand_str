@@ -1,5 +1,6 @@
 use std::convert::From;
-use std::fmt::{Display, Error as FmtError, Write};
+use std::error::Error;
+use std::fmt::{Display, Error as FmtError, Write, Result as FmtResult};
 use std::iter::Iterator;
 
 #[cfg(test)]
@@ -38,6 +39,18 @@ pub enum ExpandableStrSplitError {
     /// Bad variable name; names should not contain space or equality sign
     InvalidVariableName,
 }
+
+impl Display for ExpandableStrSplitError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
+        match self {
+            ExpandableStrSplitError::InvalidFormat => write!(f, "Invalid format"),
+            ExpandableStrSplitError::InvalidVariableName => write!(f, "Invalid variable name"),
+        }
+    }    
+}
+
+impl Error for ExpandableStrSplitError {}
+
 
 type ExpandableStrSplitResult<'a> = Result<ExpandableStrEntry<'a>, ExpandableStrSplitError>;
 
@@ -100,6 +113,8 @@ pub enum ExpandStringError<'a> {
     MissingVariable(&'a str),
     Formatting(FmtError),
 }
+
+
 
 impl<'a> From<ExpandableStrSplitError> for ExpandStringError<'a> {
     fn from(e: ExpandableStrSplitError) -> Self {
