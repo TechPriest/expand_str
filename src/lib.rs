@@ -114,6 +114,17 @@ pub enum ExpandStringError<'a> {
     Formatting(FmtError),
 }
 
+impl Display for ExpandStringError<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> FmtResult {
+        match self {
+            ExpandStringError::Splitting(e) => write!(f, "Failed to split source string: {}", e),
+            ExpandStringError::MissingVariable(v) => write!(f, "Variable required to expand source string is missing: {}", v),
+            ExpandStringError::Formatting(e) => write!(f, "Invalid source string format: {}", e),
+        }
+    }
+}
+
+impl Error for ExpandStringError<'_> {}
 
 
 impl<'a> From<ExpandableStrSplitError> for ExpandStringError<'a> {
