@@ -1,6 +1,6 @@
 [package]
 name = "expand_str"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["TechPriest <yaminogakusei@gmail.com>"]
 edition = "2018"
 repository = "https://github.com/TechPriest/expand_str.git"
